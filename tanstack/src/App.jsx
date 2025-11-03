@@ -1,9 +1,11 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function App() {
 
+  const queryClient = useQueryClient();
+
   const {data, error, isLoading} = useQuery({
-    queryKey : ['todo'],
+    queryKey : ['posts'],
     // queryFn : () => fetch("https://jsonplaceholder.typicode.com/todos/").then((res) => res.json()),
     queryFn : () => fetch("https://jsonplaceholder.typicode.com/posts/").then((res) => res.json()),
   });
@@ -13,7 +15,13 @@ export default function App() {
       method : "POST",
       body : JSON.stringify(newPost),
       headers : {"Content-type" : "application/json; charset=UTF-8"},
-    }).then((res) => res.json())
+    }).then((res) => res.json()),
+
+    onSuccess : (newPost) => {
+      // queryClient.invalidateQueries({queryKey : ['posts']});
+      queryClient.setQueryData(['posts'], (oldPost) => [...oldPost, newPost]);
+    }
+
   })
 
   if(error || isError) return <div>There was an error!</div>
@@ -28,7 +36,7 @@ export default function App() {
 
       <button
       onClick={() => mutate({
-        userId : 6000,
+        userId : 9000,
         id : 4000,
         title : "Hello",
         body : "My name is Likhith",
